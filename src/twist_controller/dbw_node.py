@@ -72,7 +72,7 @@ class DBWNode(object):
                                          BrakeCmd, queue_size=1)
 
         # TODO: Create `TwistController` object
-        self.controller = TwistController(<Arguments you wish to provide>)
+        self.controller = Controller(self.throttle_pid, self.brake_pid, self.steering_pid)
 
         # TODO: Subscribe to all the topics you need to
 		rospy.Subscriber('/twist_cmd', TwistStamped, self.twist_commands_cb, queue_size=1)
