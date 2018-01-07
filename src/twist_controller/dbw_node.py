@@ -15,25 +15,19 @@ from twist_controller import Controller
 
 '''
 You can build this node only after you have built (or partially built) the `waypoint_updater` node.
-
 You will subscribe to `/twist_cmd` message which provides the proposed linear and angular velocities.
 You can subscribe to any other message that you find important or refer to the document for list
 of messages subscribed to by the reference implementation of this node.
-
 One thing to keep in mind while building this node and the `twist_controller` class is the status
 of `dbw_enabled`. While in the simulator, its enabled all the time, in the real car, that will
 not be the case. This may cause your PID controller to accumulate error because the car could
 temporarily be driven by a human instead of your controller.
-
 We have provided two launch files with this node. Vehicle specific values (like vehicle_mass,
 wheel_base) etc should not be altered in these files.
-
 We have also provided some reference implementations for PID controller and other utility classes.
 You are free to use them or build your own.
-
 Once you have the proposed throttle, brake, and steer values, publish it on the various publishers
 that we have created in the `__init__` function.
-
 '''
 
 class DBWNode(object):
@@ -50,8 +44,8 @@ class DBWNode(object):
         steer_ratio = rospy.get_param('~steer_ratio', 14.8)
         max_lat_accel = rospy.get_param('~max_lat_accel', 3.)
         max_steer_angle = rospy.get_param('~max_steer_angle', 8.)
-		
-		self.is_drive_by_wire_enable = False
+        
+        self.is_drive_by_wire_enable = False
         self.last_twist_command = None
         self.current_velocity = None
         self.current_pose = None
@@ -75,7 +69,7 @@ class DBWNode(object):
         self.controller = Controller(self.throttle_pid, self.brake_pid, self.steering_pid)
 
         # TODO: Subscribe to all the topics you need to
-		rospy.Subscriber('/twist_cmd', TwistStamped, self.twist_commands_cb, queue_size=1)
+        rospy.Subscriber('/twist_cmd', TwistStamped, self.twist_commands_cb, queue_size=1)
         rospy.Subscriber('/vehicle/dbw_enabled', Bool, self.drive_by_wire_enabled_cb)
         rospy.Subscriber('/current_velocity', TwistStamped, self.current_velocity_cb, queue_size=1)
         rospy.Subscriber('/current_pose', geometry_msgs.msg.PoseStamped, self.current_pose_cb, queue_size=1)
@@ -95,28 +89,28 @@ class DBWNode(object):
             #                                                     <any other argument you need>)
             # if <dbw is enabled>:
             #   self.publish(throttle, brake, steer)
-			
-			data = [self.last_twist_command, self.current_velocity, self.current_pose, self.final_waypoints]
+            
+            data = [self.last_twist_command, self.current_velocity, self.current_pose, self.final_waypoints]
             data_ready = all([x is not None for x in data])
-			
-			if self.is_drive_by_wire_enable and data_ready:
-				
-				current_time = rospy.get_rostime()
+            
+            if self.is_drive_by_wire_enable and data_ready:
+                
+                current_time = rospy.get_rostime()
                 ros_duration = current_time - self.previous_loop_time
                 duration_in_seconds = ros_duration.secs + (1e-9 * ros_duration.nsecs)
                 self.previous_loop_time = current_time
-				
-				# Linear velocity and cross track error calculations based on difference between 
-				# current Vs desired speed after x waypoints
-				linear_velocity_error = self.final_waypoints[1].twist.twist.linear.x - self.current_velocity.linear.x
+                
+                # Linear velocity and cross track error calculations based on difference between 
+                # current Vs desired speed after x waypoints
+                linear_velocity_error = self.final_waypoints[1].twist.twist.linear.x - self.current_velocity.linear.x
                 cte = dbw_helper.get_cross_track_error(self.final_waypoints, self.current_pose)
-				
-				# Node output calculations
-				 throttle, brake, steering = self.controller.control(linear_velocity_error, cte, duration_in_seconds)
-				
-				# Publish
-				self.publish(throttle, brake, steering)
-				
+                
+                # Node output calculations
+                throttle, brake, steering = self.controller.control(linear_velocity_error, cte, duration_in_seconds)
+                
+                # Publish
+                self.publish(throttle, brake, steering)
+                
             rate.sleep()
 
     def publish(self, throttle, brake, steer):
@@ -136,8 +130,8 @@ class DBWNode(object):
         bcmd.pedal_cmd_type = BrakeCmd.CMD_TORQUE
         bcmd.pedal_cmd = brake
         self.brake_pub.publish(bcmd)
-		
-	def twist_commands_cb(self, msg):
+        
+    def twist_commands_cb(self, msg):
 
         self.last_twist_command = msg.twist
 
