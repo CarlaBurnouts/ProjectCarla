@@ -6,12 +6,13 @@ ONE_MPH = 0.44704
 
 class Controller(object):
 
-    def __init__(self, throttle_pid, brake_pid, steering_pid):
-        # TODO: Implement
+	def __init__(self, throttle_pid, brake_pid, steering_pid):
+	
+		# TODO: Implement
 		self.throttle_pid = throttle_pid
 		self.brake_pid = brake_pid
 		self.steering_pid = steering_pid
-
+		
 		self.throttle_filter = lowpass.SmoothingFilter(window_weight=0.79)
 		self.brake_filter = lowpass.SmoothingFilter(window_weight=0.0)
 		self.steering_filter = lowpass.SmoothingFilter(window_weight=0.51)
