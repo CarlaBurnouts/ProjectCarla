@@ -15,23 +15,24 @@ class Controller(object):
 		self.throttle_filter = lowpass.SmoothingFilter(window_weight=0.79)
 		self.brake_filter = lowpass.SmoothingFilter(window_weight=0.0)
 		self.steering_filter = lowpass.SmoothingFilter(window_weight=0.51)
-    
+		
 	def control(self, linear_velocity_error, cte, sample_time):
-        # TODO: Change the arg, kwarg list to suit your needs
-        # Return throttle, brake, steer
+		# TODO: Change the arg, kwarg list to suit your needs
+		# Return throttle, brake, steer
+		
 		if linear_velocity_error < -1.0:
 			self.throttle_pid.error_integral = 0
 
 		throttle = self.throttle_pid.step(linear_velocity_error, sample_time)
 		throttle = self.throttle_filter.get_smoothed_value(throttle)
-		
+
 		brake = 0
-		
+
 		if throttle > 0:
 					
 			self.brake_filter.get_smoothed_value(0)
 			self.brake_pid.reset()
-		
+
 		else:
 			
 			throttle = 0
@@ -41,5 +42,5 @@ class Controller(object):
 			brake = self.brake_filter.get_smoothed_value(brake)
 			
 		steering = self.steering_pid.step(cte, sample_time)
-		
+
 		return throttle, brake, steering
