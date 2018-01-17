@@ -18,7 +18,9 @@ class LowPassFilter(object):
 
         self.last_val = val
         return val
-		
+
+# Credits: https://www.swharden.com/wp/2008-11-17-linear-data-smoothing-in-python/
+
 class SmoothingFilter(object):
 	
 	def __init__(self, window_weight):
