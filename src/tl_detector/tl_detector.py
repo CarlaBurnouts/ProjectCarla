@@ -35,7 +35,7 @@ class TLDetector(object):
 
         self.stop_line_positions = self.config['stop_line_positions']
 
-        self.upcuming_red_light_publisher = rospy.Publisher('/traffic_waypoint', Int32, queue_size=1)
+        #self.upcuming_red_light_publisher = rospy.Publisher('/traffic_waypoint', Int32, queue_size=1)
 
         self.bridge = CvBridge()
         #self.light_classifier = TLClassifier()
@@ -46,10 +46,17 @@ class TLDetector(object):
         self.last_wp = -1
         self.state_count = 0
 
-        rate = rospy.Rate(1)
-        while not rospy.is_shutdown():
-            self.loop()
-            rate.sleep()    
+        work_with_tl_classifier = True
+        if work_with_tl_classifier:
+            self.upcoming_red_light_pub = rospy.Publisher('/traffic_waypoint', Int32, queue_size=1)
+            self.light_classifier = TLClassifier()
+            rospy.spin()
+        else:
+            self.upcuming_red_light_publisher = rospy.Publisher('/traffic_waypoint', Int32, queue_size=1)
+            rate = rospy.Rate(1)
+            while not rospy.is_shutdown():
+                self.loop()
+                rate.sleep()
 
     def loop(self):
         if self.pose and self.waypoints and self.lights:
@@ -186,18 +193,19 @@ class TLDetector(object):
         Returns:
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
         """
-        """
+        
         if(not self.has_image):
             self.prev_light_loc = None
             return False
         cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
         #Get classification
         return self.light_classifier.get_classification(cv_image)
-        """
+        '''
         for tl in self.lights:
             if (distance(tl.pose.position, light.pose.position) < 0.1):
                 return tl.state
         return TrafficLight.UNKNOWN
+        '''
 
     def distance(self, p1, p2):
         x, y, z = p1.x - p2.x, p1.y - p2.y, p1.z - p2.z
