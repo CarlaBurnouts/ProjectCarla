@@ -70,17 +70,21 @@ class TLClassifier(object):
                 classes = np.squeeze(classes).astype(np.int32)
 
                 #max_box = .0;
-                fx =  1345.200806
-                fy =  1353.838257
+                #fx =  1345.200806
+                #fy =  1353.838257
+		fx = 1.681501
+		fy = 2.256397
                 nearest_dist = -1;
                 nearest_light_num = -1;
-                for i in range(boxes.size()):
+                for i in range(len(boxes)):
                     if scores[i] > self.conf_prob:
                         box = boxes[i]
                         light_state = self.category_index[classes[i]]['name']
 
-                        perceived_width_x = (box[3] - box[1]) * 800
-                        perceived_width_y = (box[2] - box[0]) * 600
+                        #perceived_width_x = (box[3] - box[1]) * 800
+                        perceived_width_x = (box[3] - box[1])
+                        #perceived_width_y = (box[2] - box[0]) * 600
+                        perceived_width_y = (box[2] - box[0])
                         perceived_depth_x = ((1 * fx) / perceived_width_x)
                         perceived_depth_y = ((3 * fy) / perceived_width_y )
                         distance = round((perceived_depth_x + perceived_depth_y) / 2)
