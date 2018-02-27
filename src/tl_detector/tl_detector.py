@@ -29,7 +29,7 @@ class TLDetector(object):
         _ = rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
 
         _ = rospy.Subscriber('/vehicle/traffic_lights', TrafficLightArray, self.traffic_cb)
-        _ = rospy.Subscriber('/image_color', Image, self.image_cbi, queue_size=1)
+        _ = rospy.Subscriber('/image_color', Image, self.image_cb, queue_size=1)
 
         config_string = rospy.get_param("/traffic_light_config")
         self.config = yaml.load(config_string)
@@ -40,7 +40,7 @@ class TLDetector(object):
 
         self.bridge = CvBridge()
         self.light_classifier = TLClassifier()
-	self.has_image = False
+        self.has_image = False
         self.listener = tf.TransformListener()
 
         self.state = TrafficLight.UNKNOWN
@@ -103,6 +103,22 @@ class TLDetector(object):
                 curr_closest_pos = pos
         return curr_closest_pos
 
+    def get_stop_line(self, distance):
+        """
+        Find closest stop line position to the given position as a list of x, y coordinates. If no stop line position is provided return 0, 0
+        """
+        assert len(self.stop_line_positions) > 0
+        min_delta = 1.0E10
+        closest_line = [0,0]
+        for pos in self.stop_line_positions:
+            x, y = pos[0] - self.pose.pose.position.x, pos[1] - self.pose.pose.position.y
+            stop_line_dist = math.sqrt(x*x + y*y)
+            delta = distance - stop_line_dist
+            if delta > 0 and delta < min_delta:
+                min_delta = delta
+                closest_line = pos
+        return closest_line
+
     def get_next_red_light_pose(self):
         """
         Find position of next traffic light
@@ -146,14 +162,14 @@ class TLDetector(object):
         Args:
             msg (Image): image from car-mounted camera
         """
-	rospy.loginfo("get_image_message")
+        rospy.loginfo("get_image_message")
         self.has_image = True
         self.camera_image = msg
 
-	time0 = time.time()
+        time0 = time.time()
         light_wp, state = self.process_traffic_lights()
         time1 = time.time()
-	rospy.loginfo("cost_time: %s ms, traffic light status: %s", 1000*(time1-time0), state)
+        rospy.loginfo("cost_time: %s ms, traffic light status: %s", 1000*(time1-time0), state)
 
         '''
         Publish upcoming red lights at camera frequency.
@@ -247,7 +263,7 @@ class TLDetector(object):
         if (dist == -1):
             return -1, TrafficLight.UNKNOWN
         else:
-            stop_line = self.get_closest_stop_line_position(next_red_light_pose)
+            stop_line = self.get_stop_line(dist)
             rospy.loginfo("Stop line pos %s, %s", stop_line[0], stop_line[1])
             light_wp = self.get_closest_waypoint_xy(stop_line)
             rospy.loginfo("publish = %s", light_wp)
